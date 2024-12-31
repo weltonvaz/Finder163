@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <sys/types.h>
@@ -55,6 +56,47 @@ void Secp256K1::Init() {
 }
 
 Secp256K1::~Secp256K1() {
+}
+
+/* by Trindade */
+Point Secp256K1::OptimizationPubKeyComp(uint8_t *arr){
+    Point Q =   GTable[256 * 0 + (arr[12]-1)];//32
+    Q = Add2(Q, GTable[256 * 1 + (arr[11]-1)]);//31
+    Q = Add2(Q, GTable[256 * 2 + (arr[10]-1)]);//30
+    Q = Add2(Q, GTable[256 * 3 + (arr[9]-1)]);//29
+    Q = Add2(Q, GTable[256 * 4 + (arr[8]-1)]);//28
+    Q = Add2(Q, GTable[256 * 5 + (arr[7]-1)]);//27
+
+    if (arr[17]) Q = Add2(Q, GTable[256 * 6 + (arr[6]-1)]); // 26
+
+    Q = Add2(Q, GTable[256 * 7 + (arr[5]-1)]);//25
+    Q = Add2(Q, GTable[256 * 8 + (arr[4]-1)]);//24
+    Q = Add2(Q, GTable[256 * 9 + (0x85)]); // 0x86-1 , conhecido
+    Q = Add2(Q, GTable[256 * 10 + (arr[3]-1)]);//22
+    Q = Add2(Q, GTable[256 * 11 + (0x85)]); // 0x86-1 , conhecido
+    Q = Add2(Q, GTable[256 * 12 + (arr[2]-1)]);//20
+    Q = Add2(Q, GTable[256 * 13 + (0x29)]); // 0x2a-1 , conhecido
+    Q = Add2(Q, GTable[256 * 14 + (0x7a)]); // 0x7b-1 , conhecido
+    Q = Add2(Q, GTable[256 * 15 + (0xb0)]); // 0xb1-1 , conhecido
+    Q = Add2(Q, GTable[256 * 16 + (arr[1]-1)]);//16
+    Q = Add2(Q, GTable[256 * 17 + (arr[0]-1)]);//15
+    Q = Add2(Q, GTable[256 * 18 + (0x0d)]); // 0x0e-1 , conhecido
+    Q = Add2(Q, GTable[256 * 19 + (0x56)]); // 0x57-1 , conhecido
+    Q = Add2(Q, GTable[256 * 20 + (0xce)]); // 0xcf-1 , conhecido
+    Q = Add2(Q, GTable[256 * 21 + (0x9f)]); // 0xa0-1 , conhecido
+    Q = Add2(Q, GTable[256 * 22 + (0x34)]); // 0x35-1 , conhecido
+    Q = Add2(Q, GTable[256 * 23 + (0xf2)]); // 0xf3-1 , conhecido
+    Q = Add2(Q, GTable[256 * 24 + (0x91)]); // 0x92-1 , conhecido
+    Q = Add2(Q, GTable[256 * 25 + (0x69)]); // 0x6a-1 , conhecido
+    Q = Add2(Q, GTable[256 * 26 + (0xf4)]); // 0xf5-1 , conhecido
+    Q = Add2(Q, GTable[256 * 27 + (0xce)]); // 0xcf-1 , conhecido
+    Q = Add2(Q, GTable[256 * 28 + (0x4e)]); // 0x4f-1 , conhecido
+    Q = Add2(Q, GTable[256 * 29 + (0x3c)]); // 0x3d-1 , conhecido
+    Q = Add2(Q, GTable[256 * 30 + (0x3a)]); // 0x3b-1 , conhecido
+    Q = Add2(Q, GTable[256 * 31 + (0x3f)]); // 0x40-1 , conhecido
+
+    Q.Reduce();
+    return Q;
 }
 
 Point Secp256K1::ComputePublicKey(Int *privKey) {
@@ -168,41 +210,41 @@ bool Secp256K1::ParsePublicKeyHex(char *str,Point &ret,bool &isCompressed) {
   return true;
 }
 
-// char* Secp256K1::GetPublicKeyHex(bool compressed, Point &pubKey) {
-//   unsigned char publicKeyBytes[65];
-//   // char *ret = NULL; // nunca pedirei a chave nao comprimida
-//   // if (!compressed) {
-//   //   //Uncompressed public key
-//   //   publicKeyBytes[0] = 0x4;
-//   //   pubKey.x.Get32Bytes(publicKeyBytes + 1);
-//   //   pubKey.y.Get32Bytes(publicKeyBytes + 33);
-//   //   ret = (char*) tohex((char*)publicKeyBytes,65);
-//   // }
-//   // else {
-//     // Compressed public key
-//     publicKeyBytes[0] = pubKey.y.IsEven() ? 0x2 : 0x3;
-//     pubKey.x.Get32Bytes(publicKeyBytes + 1);
-//     char *ret = (char*) tohex((char*)publicKeyBytes,33);
-//   // }
-//   return ret;
-// }
+char* Secp256K1::GetPublicKeyHex(bool compressed, Point &pubKey) {
+  unsigned char publicKeyBytes[65];
+  // char *ret = NULL; // nunca pedirei a chave nao comprimida
+  // if (!compressed) {
+  //   //Uncompressed public key
+  //   publicKeyBytes[0] = 0x4;
+  //   pubKey.x.Get32Bytes(publicKeyBytes + 1);
+  //   pubKey.y.Get32Bytes(publicKeyBytes + 33);
+  //   ret = (char*) tohex((char*)publicKeyBytes,65);
+  // }
+  // else {
+    // Compressed public key
+    publicKeyBytes[0] = pubKey.y.IsEven() ? 0x2 : 0x3;
+    pubKey.x.Get32Bytes(publicKeyBytes + 1);
+    char *ret = (char*) tohex((char*)publicKeyBytes,33);
+  // }
+  return ret;
+}
 
-// void Secp256K1::GetPublicKeyHex(bool compressed, Point &pubKey,char *dst){
-//   unsigned char publicKeyBytes[65];
-//   if (!compressed) {
-//     //Uncompressed public key
-//     publicKeyBytes[0] = 0x4;
-//     pubKey.x.Get32Bytes(publicKeyBytes + 1);
-//     pubKey.y.Get32Bytes(publicKeyBytes + 33);
-//     tohex_dst((char*)publicKeyBytes,65,dst);
-//   }
-//   else {
-//     // Compressed public key
-//     publicKeyBytes[0] = pubKey.y.IsEven() ? 0x2 : 0x3;
-//     pubKey.x.Get32Bytes(publicKeyBytes + 1);
-// 	tohex_dst((char*)publicKeyBytes,33,dst);
-//   }
-// }
+void Secp256K1::GetPublicKeyHex(bool compressed, Point &pubKey,char *dst){
+  unsigned char publicKeyBytes[65];
+  if (!compressed) {
+    //Uncompressed public key
+    publicKeyBytes[0] = 0x4;
+    pubKey.x.Get32Bytes(publicKeyBytes + 1);
+    pubKey.y.Get32Bytes(publicKeyBytes + 33);
+    tohex_dst((char*)publicKeyBytes,65,dst);
+  }
+  else {
+    // Compressed public key
+    publicKeyBytes[0] = pubKey.y.IsEven() ? 0x2 : 0x3;
+    pubKey.x.Get32Bytes(publicKeyBytes + 1);
+	tohex_dst((char*)publicKeyBytes,33,dst);
+  }
+}
 
 /* by Trindade */
 void Secp256K1::GetPubKeyHexCompressed(Point &pubkey, u_char *destino){
@@ -284,7 +326,7 @@ Point Secp256K1::Add2(Point &p1, Point &p2) {
   Int vs2v2;
   Int vs3u2;
   Int _2vs2v2;
-  Point r;
+  Point r; // valor de retorno
   u1.ModMulK1(&p2.y, &p1.z);
   v1.ModMulK1(&p2.x, &p1.z);
   u.ModSub(&u1, &p1.y);
