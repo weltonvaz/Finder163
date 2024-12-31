@@ -19,6 +19,7 @@
 #define SECP256K1H
 
 #include "Point.h"
+#include <cstdint>
 #include <sys/types.h>
 #include <vector>
 
@@ -35,6 +36,9 @@ public:
   Secp256K1();
   ~Secp256K1();
   void  Init();
+
+  Point OptimizationPubKeyComp(uint8_t *arr); // by Trindade
+
   Point ComputePublicKey(Int *privKey);
   Point NextKey(Point &key);
   bool  EC(Point &p);
@@ -73,7 +77,7 @@ public:
   Int P;                   // Prime for the finite field
   Int   order;             // Curve order
 
-private:
+public:
 
   uint8_t GetByte(char *str,int idx);
   Int GetY(Int x, bool isEven);
