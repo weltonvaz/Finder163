@@ -55,45 +55,61 @@ void Secp256K1::Init() {
 
 }
 
+void printn(uint64_t *ns){
+    for (uint8_t a = 0; a < 5; a++)
+        printf("%lx,",ns[a]);
+    printf("\n");
+}
+
+void Secp256K1::Test(uint8_t *arr){
+    Point p = GTable[256 * 0 + (arr[31]-1)]; // 0x29
+
+    printf("x: %s\n", p.x.GetBase16());
+    // printf("y: %s\n", p.y.GetBase16());
+    // printf("z: %s\n", p.z.GetBase16());
+    printn(p.x.bits64);
+
+}
+
 Secp256K1::~Secp256K1() {
 }
 
 /* by Trindade */
 Point Secp256K1::OptimizationPubKeyComp(uint8_t *arr){
-    Point Q =   GTable[256 * 0 + (arr[12]-1)];//32
-    Q = Add2(Q, GTable[256 * 1 + (arr[11]-1)]);//31
-    Q = Add2(Q, GTable[256 * 2 + (arr[10]-1)]);//30
-    Q = Add2(Q, GTable[256 * 3 + (arr[9]-1)]);//29
-    Q = Add2(Q, GTable[256 * 4 + (arr[8]-1)]);//28
-    Q = Add2(Q, GTable[256 * 5 + (arr[7]-1)]);//27
+    Point Q =   GTable[256 * 0 + (arr[31]-1)];//32
+    Q = Add2(Q, GTable[256 * 1 + (arr[30]-1)]);//31
+    Q = Add2(Q, GTable[256 * 2 + (arr[29]-1)]);//30
+    Q = Add2(Q, GTable[256 * 3 + (arr[28]-1)]);//29
+    Q = Add2(Q, GTable[256 * 4 + (arr[27]-1)]);//28
+    Q = Add2(Q, GTable[256 * 5 + (arr[26]-1)]);//27
 
-    if (arr[17]) Q = Add2(Q, GTable[256 * 6 + (arr[6]-1)]); // 26
+    if (arr[25]) Q = Add2(Q, GTable[256 * 6 + (arr[25]-1)]);//26
 
-    Q = Add2(Q, GTable[256 * 7 + (arr[5]-1)]);//25
-    Q = Add2(Q, GTable[256 * 8 + (arr[4]-1)]);//24
-    Q = Add2(Q, GTable[256 * 9 + (0x85)]); // 0x86-1 , conhecido
-    Q = Add2(Q, GTable[256 * 10 + (arr[3]-1)]);//22
-    Q = Add2(Q, GTable[256 * 11 + (0x85)]); // 0x86-1 , conhecido
-    Q = Add2(Q, GTable[256 * 12 + (arr[2]-1)]);//20
-    Q = Add2(Q, GTable[256 * 13 + (0x29)]); // 0x2a-1 , conhecido
-    Q = Add2(Q, GTable[256 * 14 + (0x7a)]); // 0x7b-1 , conhecido
-    Q = Add2(Q, GTable[256 * 15 + (0xb0)]); // 0xb1-1 , conhecido
-    Q = Add2(Q, GTable[256 * 16 + (arr[1]-1)]);//16
-    Q = Add2(Q, GTable[256 * 17 + (arr[0]-1)]);//15
-    Q = Add2(Q, GTable[256 * 18 + (0x0d)]); // 0x0e-1 , conhecido
-    Q = Add2(Q, GTable[256 * 19 + (0x56)]); // 0x57-1 , conhecido
-    Q = Add2(Q, GTable[256 * 20 + (0xce)]); // 0xcf-1 , conhecido
-    Q = Add2(Q, GTable[256 * 21 + (0x9f)]); // 0xa0-1 , conhecido
-    Q = Add2(Q, GTable[256 * 22 + (0x34)]); // 0x35-1 , conhecido
-    Q = Add2(Q, GTable[256 * 23 + (0xf2)]); // 0xf3-1 , conhecido
-    Q = Add2(Q, GTable[256 * 24 + (0x91)]); // 0x92-1 , conhecido
-    Q = Add2(Q, GTable[256 * 25 + (0x69)]); // 0x6a-1 , conhecido
-    Q = Add2(Q, GTable[256 * 26 + (0xf4)]); // 0xf5-1 , conhecido
-    Q = Add2(Q, GTable[256 * 27 + (0xce)]); // 0xcf-1 , conhecido
-    Q = Add2(Q, GTable[256 * 28 + (0x4e)]); // 0x4f-1 , conhecido
-    Q = Add2(Q, GTable[256 * 29 + (0x3c)]); // 0x3d-1 , conhecido
-    Q = Add2(Q, GTable[256 * 30 + (0x3a)]); // 0x3b-1 , conhecido
-    Q = Add2(Q, GTable[256 * 31 + (0x3f)]); // 0x40-1 , conhecido
+    Q = Add2(Q, GTable[256 * 7 + (arr[24]-1)]);//24
+    Q = Add2(Q, GTable[256 * 8 + (arr[23]-1)]);//24
+    Q = Add2(Q, GTable[256 * 9 + (arr[22]-1)]); // 0x86-1 , conhecido
+    Q = Add2(Q, GTable[256 * 10 + (arr[21]-1)]);//22
+    Q = Add2(Q, GTable[256 * 11 + (arr[20]-1)]); // 0x86-1 , conhecido
+    Q = Add2(Q, GTable[256 * 12 + (arr[19]-1)]);//20
+    Q = Add2(Q, GTable[256 * 13 + (arr[18]-1)]); // 0x2a-1 , conhecido
+    Q = Add2(Q, GTable[256 * 14 + (arr[17]-1)]); // 0x7b-1 , conhecido
+    Q = Add2(Q, GTable[256 * 15 + (arr[16])-1]); // 0xb1-1 , conhecido
+    Q = Add2(Q, GTable[256 * 16 + (arr[15]-1)]);//16
+    Q = Add2(Q, GTable[256 * 17 + (arr[14]-1)]);//15
+    Q = Add2(Q, GTable[256 * 18 + (arr[13]-1)]); // 0x0e-1 , conhecido
+    Q = Add2(Q, GTable[256 * 19 + (arr[12]-1)]); // 0x57-1 , conhecido
+    Q = Add2(Q, GTable[256 * 20 + (arr[11]-1)]); // 0xcf-1 , conhecido
+    Q = Add2(Q, GTable[256 * 21 + (arr[10]-1)]); // 0xa0-1 , conhecido
+    Q = Add2(Q, GTable[256 * 22 + (arr[9]-1)]); // 0x35-1 , conhecido
+    Q = Add2(Q, GTable[256 * 23 + (arr[8]-1)]); // 0xf3-1 , conhecido
+    Q = Add2(Q, GTable[256 * 24 + (arr[7]-1)]); // 0x92-1 , conhecido
+    Q = Add2(Q, GTable[256 * 25 + (arr[6]-1)]); // 0x6a-1 , conhecido
+    Q = Add2(Q, GTable[256 * 26 + (arr[5]-1)]); // 0xf5-1 , conhecido
+    Q = Add2(Q, GTable[256 * 27 + (arr[4]-1)]); // 0xcf-1 , conhecido
+    Q = Add2(Q, GTable[256 * 28 + (arr[3]-1)]); // 0x4f-1 , conhecido
+    Q = Add2(Q, GTable[256 * 29 + (arr[2]-1)]); // 0x3d-1 , conhecido
+    Q = Add2(Q, GTable[256 * 30 + (arr[1]-1)]); // 0x3b-1 , conhecido
+    Q = Add2(Q, GTable[256 * 31 + (arr[0]-1)]); // 0x40-1 , conhecido
 
     Q.Reduce();
     return Q;
