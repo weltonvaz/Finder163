@@ -208,6 +208,7 @@ int main(){
         // randomize();
         // normalDec();
         // decrement();
+        // increment();
         // normalDec();
         pubkey = secp->OptimizationPubKeyComp(PRIVATEKEY);
         secp->GetPubKeyHexCompressed(pubkey, pub);
