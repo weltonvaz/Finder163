@@ -10,10 +10,6 @@
 #include <chrono>
 #include <ctime>
 #include "stdbool.h"
-#include <fstream>
-#include <cstring> // Para usar memcmp
-#include <sstream> // Para manipulação de strings
-#include <iomanip> // Para std::setw e std::setfill
 
 #include "secp256k1/SECP256k1.h"
 #include "secp256k1/Point.h"
@@ -41,13 +37,13 @@ const uint8_t MAX_PRIVATEKEY[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-    0x83, 0x2E, 0xD7, 0x4F, 0x2B, 0x5F, 0x35, 0xFF
+    0x83, 0x2E, 0xD7, 0x4F, 0x2B, 0x5F, 0x35, 0xEE
 };
 
-// RIPEMD-160 alvo (em minúsculas)
+// RIPEMD-160 alvo
 static const uint8_t TARGET[20] = {
-    0xd0, 0xaa, 0x90, 0x17, 0xf7, 0x4d, 0x7a, 0xd6, 0x87, 0x67,
-    0x27, 0xf9, 0xec, 0x44, 0xa5, 0x69, 0x6a, 0x3e, 0x41, 0xcc
+    0x73, 0xfc, 0x56, 0x0b, 0x7a, 0x01, 0xb2, 0x23, 0x3c, 0xc0,
+    0x71, 0x4a, 0x83, 0x8f, 0xc3, 0x7e, 0x63, 0x34, 0x8b, 0x5e
 };
 
 static uint8_t pub[33];
@@ -55,18 +51,15 @@ static uint8_t pub[33];
 void Init(){
     secp->Init();
     printf("%s\n","find 163 by Trindade v1\n Esse código é uma modificação do código do keyhunt");
-    printf("Esse código faz a busca da chave privada que gera o RIPEMD-160: ");
-    for (int i = 0; i < 20; i++) {
-        printf("%02x", TARGET[i]);
-    }
-    printf("\nProcurando...\n");
+    printf("Esse código faz a busca da chave privada que gera o RIPEMD-160: 20d45a6a762535700ce9e0b216e31994335db8a5 \n");
+    printf("Carteira para doações: bc1qlywys40f6p3njax5txf8lh4qs2hmt58nmsp5j7\n");
+    printf("Procurando...\n");
 }
 
 bool compare(){
-    for (int i = 0; i < 20; i++) {
-        if (pub[i] != TARGET[i]) return false;
-    }
-    return true;
+    uint8_t i = 19;
+    while (pub[i] == TARGET[i] && i--);
+    return i == 0xff;
 }
 
 bool is_within_range(uint8_t *current_key, const uint8_t *max_key) {
@@ -89,35 +82,6 @@ void printArray(uint8_t *arr, size_t size){
     printf("\n");
 }
 
-std::string toHexString(uint8_t *data, size_t size) {
-    std::stringstream ss;
-    for (size_t i = 0; i < size; i++) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)data[i];
-    }
-    return ss.str();
-}
-
-void saveToFile(const char* filename, uint8_t* privateKey, uint8_t* rmd160) {
-    std::ofstream file(filename);
-    if (file.is_open()) {
-        file << "Chave Privada: " << toHexString(privateKey, 32) << "\n";
-        file << "RIPEMD-160: " << toHexString(rmd160, 20) << "\n";
-        file.close();
-    } else {
-        printf("Erro ao salvar o arquivo.\n");
-    }
-}
-
-void logActivity(const char* message, uint8_t* privateKey) {
-    std::ofstream logFile("activity_log.txt", std::ios::app);
-    if (logFile.is_open()) {
-        logFile << message << toHexString(privateKey, 32) << "\n";
-        logFile.close();
-    } else {
-        printf("Erro ao salvar o log de atividades.\n");
-    }
-}
-
 int main(){
     Init();
     uint64_t speed = 0;
@@ -129,13 +93,9 @@ int main(){
     printf("Velocidade: \n");
     bool procurando = true;
 
-    // Log inicial
-    logActivity("Iniciando busca. Chave privada inicial: ", PRIVATEKEY);
-
     while (procurando) {
         if (!is_within_range(PRIVATEKEY, MAX_PRIVATEKEY)) {
             printf("Intervalo de chaves esgotado.\n");
-            logActivity("Intervalo de chaves esgotado. Última chave privada: ", PRIVATEKEY);
             break;
         }
 
@@ -147,25 +107,14 @@ int main(){
         if (compare()) {
             procurando = false; // Encontra e sai do loop
             printf("\nEncontrou!!\n");
-            printf("RIPEMD-160: ");
             printArray(pub, 20); // Exibe o RIPEMD
-            printf("Chave Privada: ");
             printArray(PRIVATEKEY, 32); // Exibe a chave privada
-
-            // Salva o resultado no arquivo
-            saveToFile("KEYFOUND.txt", PRIVATEKEY, pub);
-            logActivity("Chave privada encontrada: ", PRIVATEKEY);
             break;
         }
 
         increment(); // Incrementa a chave privada
         contagem++;
         speed++;
-
-        // Log da chave privada atual
-        if (contagem % 1000 == 0) {
-            logActivity("Tentativa atual: ", PRIVATEKEY);
-        }
 
         clock_gettime(CLOCK_MONOTONIC_RAW, &agora); // Marca o tempo atual
         double tempo_decorrido = (agora.tv_sec - inicio.tv_sec) +
